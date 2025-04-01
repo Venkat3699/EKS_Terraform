@@ -19,7 +19,7 @@ resource "aws_subnet" "devops_subnet" {
 
   tags = {
     Name = "devops-subnet-${count.index}"
-    kubernetes.io/role/elb = 1
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
