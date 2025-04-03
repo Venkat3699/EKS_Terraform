@@ -43,3 +43,21 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+  terraform-fmt:
+    name: 'Terraform Format Check'
+    runs-on: terraform_runner
+    needs: terraform-init
+    steps:
+      - name: Terraform Format (Auto-fix)
+        run: terraform fmt -recursive
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+        
+  terraform-validate:
+    name: 'Terraform Validate'
+    runs-on: terraform_runner
+    needs: terraform-fmt
+    steps:
+      - name: Terraform Validate
+        run: terraform validate
