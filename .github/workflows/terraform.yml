@@ -3,6 +3,7 @@ name: 'Terraform'
 on:
   push:
     branches: [ "master" ]
+  workflow_dispatch:  # Allows manual execution
 
 jobs:
   checkout:
@@ -108,8 +109,8 @@ jobs:
     steps:
     - name: 'Run tfsec and Save Output'
       run: |
-        tfsec . --format table | tee tfsec-table.txt || true
-        tfsec . --format table > tfsec.json || true
+        tfsec . --format text | tee tfsec-table.txt || true
+        tfsec . --format json > tfsec.json || true
 
   terraform-plan:
     name: 'Terraform Plan'
@@ -146,7 +147,7 @@ jobs:
     name: 'Terraform Destroy'
     runs-on: terraform_runner
     needs: terraform-apply
-    if: github.event_name == 'workflow_dispatch'  # Only runs if manually triggered
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: 'Configure AWS credentials'
         uses: aws-actions/configure-aws-credentials@v1
