@@ -25,6 +25,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-south-1'
 
+      - name: 'Verify AWS Credentials'
+        run: |
+          aws sts get-caller-identity
+
   setup-terraform:
     name: 'Setup Terraform'
     runs-on: terraform_runner
@@ -113,4 +117,46 @@ jobs:
     needs: tfsec-check
     steps:
       - name: 'Terraform Plan'
-        run: terraform plan -out=tfplan
+        run: |
+          export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          terraform plan -out=tfplan
+
+  terraform-apply: 
+    name: 'Terraform Apply'
+    runs-on: terraform_runner
+    needs: terraform-plan
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: 'Configure AWS credentials'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'ap-south-1'
+
+      - name: 'Verify AWS Credentials'
+        run: aws sts get-caller-identity  # Check if AWS credentials are valid
+
+      - name: 'Terraform Apply'
+        run: terraform apply -auto-approve tfplan
+
+
+  terraform-destroy:
+    name: 'Terraform Destroy'
+    runs-on: terraform_runner
+    needs: terraform-apply
+    if: github.event_name == 'workflow_dispatch'  # Only runs if manually triggered
+    steps:
+      - name: 'Configure AWS credentials'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'ap-south-1'
+
+      - name: 'Verify AWS Credentials'
+        run: aws sts get-caller-identity  # Ensure credentials are valid
+
+      - name: 'Terraform Destroy'
+        run: terraform destroy -auto-approve
