@@ -9,7 +9,7 @@ jobs:
     name: 'Checkout Repository'
     runs-on: terraform_runner
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
   setup-aws:
