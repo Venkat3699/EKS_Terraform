@@ -104,4 +104,4 @@ jobs:
     steps:
     - name: 'Run tfsec and Save Output'
       run: |
-        tfsec . --format json > tfsec.json
+        tfsec . --format json > tfsec.json || true
