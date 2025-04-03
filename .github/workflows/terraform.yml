@@ -130,5 +130,3 @@ jobs:
     steps:
     - name: Terraform Destroy
       run: terraform destroy -auto-approve
-
-      
