@@ -53,7 +53,7 @@ jobs:
 
       - name: Terraform Format Check
         run: terraform fmt -check
-        
+
   terraform-validate:
     name: 'Terraform Validate'
     runs-on: terraform_runner
@@ -61,3 +61,26 @@ jobs:
     steps:
       - name: Terraform Validate
         run: terraform validate
+
+  install-tflint:
+    name: 'Install TFLint'
+    runs-on: terraform_runner
+    needs: terraform-validate
+    steps:
+      - name: 'Install TFLint'
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          echo "$HOME/.tflint/bin" >> $GITHUB_PATH  # Ensure it's available in the PATH
+          export PATH=$HOME/.tflint/bin:$PATH       # Immediate path update
+          tflint --version  # Verify installation
+      
+      
+  tflint-check:
+    name: 'Run TFLint'
+    runs-on: terraform_runner
+    needs: install-tflint
+    steps:
+      - name: 'TFLint'
+        run: |
+          tflint --init
+          tflint
