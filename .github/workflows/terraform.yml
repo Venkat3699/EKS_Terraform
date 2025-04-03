@@ -104,4 +104,13 @@ jobs:
     steps:
     - name: 'Run tfsec and Save Output'
       run: |
-        tfsec . --format json > tfsec.json || true
+        tfsec . --format table | tee tfsec-table.txt || true
+        tfsec . --format table > tfsec.json || true
+
+  terraform-plan:
+    name: 'Terraform Plan'
+    runs-on: terraform_runner
+    needs: tfsec-check
+    steps:
+      - name: 'Terraform Plan'
+        run: terraform plan -out=tfplan
